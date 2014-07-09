@@ -1,0 +1,27 @@
+<launch>
+  <node pkg="baxter_interface" type="joint_trajectory_action_server.py" name="joint_trajectory_action_server"
+	output="screen" />
+  <node pkg="roseus" type="roseus" name="joint_observer"
+        args="$(find baxter_bartender)/euslisp/joint_observer.l"
+        output="screen" />
+  <node pkg="roseus" type="roseus" name="joint_observe_service"
+        args="$(find baxter_bartender)/euslisp/joint_observe_service.l"
+        output="screen" />
+  <node pkg="roseus" type="roseus" name="table_touch_it"
+        args="$(find baxter_bartender)/euslisp/table-touch-it.l"
+        output="screen" />
+  <node pkg="roseus" type="roseus" name="oshibori_detector"
+        args="$(find baxter_bartender)/euslisp/oshibori-detector.l"
+        output="screen" />
+  <node pkg="baxter_bartender" type="gripper_controller_node.py"
+	name="gripper_controller" output="screen" />
+  <node pkg="roseus" type="roseus" name="head_controller"
+        args="$(find baxter_bartender)/teleop/head-controller.l"
+        output="screen" />
+  <include file="$(find baxter_moveit_config)/launch/demo_baxter.launch" />
+  <!--
+  <node pkg="roseus" type="roseus" name="table_top_reaching"
+  args="$(find baxter_bartender)/euslisp/table_top_reaching.l"
+        output="screen" />
+  -->
+</launch>

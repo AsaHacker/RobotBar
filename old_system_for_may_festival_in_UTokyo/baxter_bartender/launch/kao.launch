@@ -1,0 +1,20 @@
+<launch>
+
+  <node pkg="roseus" type="roseus" name="pad_emotion"
+        args="$(find kao_project)/bin/pad_emotion.l"
+        output="screen" />
+  <node pkg="roseus" type="roseus" name="voice_echo"
+        args="$(find kao_project)/bin/voice_echo.l"
+        output="screen" />
+  <node pkg="roseus" type="roseus" name="talk_sample"
+        args="$(find kao_project)/euslisp/talk_sample.l"
+        output="screen" />
+
+  <node pkg="kao_project"
+	type="run_jar.sh"
+	name="face_pad"
+	args="$(find baxter_bartender)/script/FacePAD.jar -r $(env ROS_IP) -m $(env ROS_MASTER_URI) -t face_pad_node/image:=/robot/xdisplay"
+	output="screen" />
+
+  <include file="$(find kao_project)/launch/face_detect.launch" />
+</launch>

@@ -1,0 +1,4 @@
+<launch>
+ <node name= "odom_world" pkg="tf" type="static_transform_publisher"
+        args="0.0 0.0 0.0  -0.9 0 0 /baxter/base_footprint /baxter/bakui_tuned 10" />
+</launch>
