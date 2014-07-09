@@ -1,0 +1,351 @@
+#!/usr/bin/env roseus
+
+(ros::roseus "oshibori_detect")
+(ros::roseus-add-msgs "sensor_msgs")
+
+(require "package://eus_pcl/euslisp/eus_pcl.l")
+(require "package://baxtereus/baxter.l")
+;; (require "baxter-util.l")
+(require "baxter-bar-scene.l")
+(require "table-circle.l")
+
+(defvar *robot* (baxter))
+(defvar *time-step* 0.3)
+(defvar *plane-coeff* #F(0 0 0 0))
+(defvar *table-circle* (table-circle))
+
+(ros::rate (round (/ 1.0 *time-step*)))
+
+(defun pcd-check
+  (pcd &key ret)
+  (if (and pcd (send pcd :points)
+	   (plusp (setq ret (send (send pcd :points) :get-val 'dim0))))
+      ret nil))
+
+(defun filter-remove-indices
+  (pcd func
+       &key
+       (points (send pcd :points))
+       (colors (send pcd :colors))
+       (normals (send pcd :normals)))
+  (let (id)
+    (dotimes (i (send points :get-val 'dim0))
+      (if (funcall func
+		   (matrix-row points i)
+		   (if (and colors (< i (send colors :get-val 'dim0)))
+		       (matrix-row colors i))
+		   (if (and normals (< i (send normals :get-val 'dim0)))
+		       (matrix-row normals i)))
+	  (push i id)))
+    id))
+
+(defun resize-pcd
+  (pcd &key
+       (max 10000)
+       (min 1000)
+       ;; (point (send pcd :points))
+       (size (pcd-check pcd)) ;; (if point (send point :get-val 'dim0)))
+       (step))
+  (cond
+   ((null size) nil)
+   ((and (> size min) (< size max)) pcd)
+   ((> size max)
+    (setq step  (round (/ (* 1.0 size) max)))
+    (let ((buf nil)
+	  (id 0))
+      (dotimes (i (floor (/ size step)))
+	(push id buf)
+	(setq id (+ id step)))
+      (send pcd :filter-with-indices buf :create t)))
+   ((< size min)
+    (setq step  (round (/ min (* 1.0 size))))
+    (let ((buf nil)
+	  (id 0))
+      (dotimes (i size)
+	(dotimes (j step) (push i buf)))
+      (send pcd :filter-with-indices buf :create t)))))
+
+(defun random-fatten-pcd
+  (pcd &key
+       (points (send pcd :points))
+       (colors (send pcd :colors))
+       (normals (send pcd :normals))
+       (size (or (pcd-check pcd) -1))
+       (target-size 10000)
+       (step (round (/ target-size (* 1.0 size))))
+       (pbuf) (cbuf) (nbuf)
+       (pram 30.0) (cram 0.1) (nram 0)
+       )
+  (cond
+   ((minusp size) nil)
+   ((<= step 1) pcd)
+   (t
+    (dotimes (i size)
+      (dotimes (j step)
+	(push (v+ (matrix-row points i) (random-vector pram)) pbuf)
+	(if (and colors (< i (send colors :get-val 'dim0)))
+	    (push (map float-vector
+		       #'(lambda (val) (cond ((> val 1.0) 1.0) ((< val 0.0) 0.0) (t val)))
+		       (v+ (matrix-row colors i) (random-vector cram)))
+		  cbuf))
+	(if (and normals (< i (send normals :get-val 'dim0)))
+	    (push (normalize-vector
+		   (v+ (matrix-row normals i) (random-vector nram)))
+		  nbuf))
+	)
+      )
+    (instance pointcloud :init
+	      :points pbuf :colors cbuf :normals nbuf))))
+
+(defun remove-unreachable-pcd
+  (pcd
+   &key
+   (max-arm-length 1200)
+   (min-arm-length 500)
+   (remove-func #'(lambda (p c n)
+		    (and (< (norm p) max-arm-length)
+			 (> (norm p) min-arm-length)))))
+  (send pcd
+	:filter-with-indices
+	(filter-remove-indices pcd remove-func)
+	:create t)
+  )
+
+(defun remove-all-plane
+  (pcd
+   &key
+   (plane-detect
+    (progn
+      ;; (print (send (send pcd :points) :get-val 'dim0))
+      ;; (pcl::extract-planes pcd 10 1 100 10.0 10.0)
+      (pcl::extract-planes pcd 10 1 100 15.0 15.0)
+      )
+    )
+   (indices (apply #'concatenate (cons cons (cadr plane-detect))))
+   (indices-buf)
+   (coeff #F(0 0 0 0))
+   ret)
+  (if (not (pcd-check pcd)) (return-from remove-all-plane nil))
+  ;; (print (length indices))
+  (dotimes (i (send (send pcd :points) :get-val 'dim0))
+    (cond
+     ((eq (car indices) i) (setq indices (cdr indices)))
+     (t (push i indices-buf))))
+  ;; (print (length indices-buf))
+  (setq
+   ret
+   (send pcd
+	 :filter-with-indices
+	 indices-buf
+	 ;; indices
+	 ;; negative nil
+	 :create t))
+  ;; (print (send (send ret :points) :get-val 'dim0))
+  (if (flatten plane-detect)
+      (dotimes (i 4) (setf (aref coeff i) (aref (caar plane-detect) i))))
+  ret)
+
+(defun inner-pos-from-coeff
+  (coeff
+   &key
+   (max (apply #'max (mapcar #'abs (butlast (coerce coeff cons))))))
+  (cond
+   ((eps= (aref coeff 0) max 0.1)
+    (float-vector (* 1 (/ (aref coeff 3) (aref coeff 0))) 0 0))
+   ((eps= (aref coeff 1) max 0.1)
+    (float-vector 0 (* 1 (/ (aref coeff 3) (aref coeff 1))) 0))
+   (t
+    (float-vector 0 0 (* 1 (/ (aref coeff 3) (aref coeff 2)))))))
+
+(defun tabletop-object
+  (pcd
+   &key
+   (coeff *plane-coeff*)
+   (pcd2 (remove-all-plane pcd :coeff coeff))
+   (thre 200)
+   (normal (normalize-vector (subseq coeff 0 3)))
+   (a (inner-pos-from-coeff coeff))
+   (remove-func
+    #'(lambda (p c n)
+	(let ((v (* +1 (v. normal (v+ p a)))))
+	  (and (> v 0.0) (< v thre)))))
+   ret)
+  (if (not (pcd-check pcd2)) (return-from tabletop-object nil))
+  ;;  (print coeff)
+  ;;  (print a)
+  (setq
+   ret
+   (send pcd2
+	 :filter-with-indices
+	 (filter-remove-indices pcd2 remove-func)
+	 :create t))
+  (if (send ret :colors)
+      (dotimes (i (send (send ret :colors) :get-val 'dim0))
+	(setf (aref (send ret :colors) i 0) 1)
+	(setf (aref (send ret :colors) i 0) 0)
+	(setf (aref (send ret :colors) i 0) 0)))
+  ret
+  )
+
+(defun calc-covariance
+  (pcd)
+  (let* ((pl (send pcd :points))
+	 (size (send pl :get-val 'dim0))
+	 (c #F(0 0 0))
+	 (ret (float-vector 0 0 0)))
+    (dotimes (i size)
+      (dotimes (j 3)
+	(setf (aref c j) (+ (aref c j) (aref pl i j)))))
+    (dotimes (j 3) (setf (aref c j) (/ (aref c j) size)))
+    (dotimes (i size)
+      (dotimes (j 3)
+	(setf (aref ret j)
+	      (+
+	       (aref ret j)
+	       (/
+		(expt (- (aref pl i j) (aref c j)) 2)
+		size))
+	      )))
+    (dotimes (j 3)
+      (setf (aref ret j) (sqrt (aref ret j))))
+    ret))
+
+(defun calc-centroid
+  (pcd)
+  (let* ((pl (send pcd :points))
+	 (size (send pl :get-val 'dim0))
+	 (c #F(0 0 0))
+	 (ret (float-vector 0 0 0)))
+    (dotimes (i size)
+      (dotimes (j 3)
+	(setf (aref c j) (+ (aref c j) (aref pl i j)))))
+    (dotimes (j 3) (setf (aref c j) (/ (aref c j) size)))
+    c))
+
+
+(defun min-covariance-cluster
+  (pcd
+   &key
+   (func #'norm)
+   ;; (func #'(lambda (v) (let* ((n0 (normalize-vector (subseq *plane-coeff* 0 3)))
+   ;; 			      (n (scale (v. n0 v) n0))
+   ;; 			      (a (v- v n)))
+   ;; 			 (format t "~A vs ~A~%" a n)
+   ;; 			 (/ (norm a) (max (norm n) 1e-6)))))
+   (remove-func #'(lambda (v)
+		    (let* ((ret
+			    (> 
+			     (norm (car v))
+;;			     (abs
+;;				(v. (subseq *plane-coeff* 0 3)
+;;				    (car v)))
+			     100)))
+		      (if ret
+			  (format t
+				  "[remove-cluster] ~A~%"
+				  (car v)))
+		      ret)))
+   (eval (float-vector 0))
+   )
+  (if (not (pcd-check pcd)) (return-from min-covariance-cluster nil))
+  (let* (;;(idl (pcl::extract-euclidean-clusters pcd 500 20000 20.0))
+	 (idl
+	  (pcl::extract-euclidean-clusters
+	   pcd
+	   (min 150 (print (round (/ (send (send pcd :points) :get-val 'dim0) 10.0))))
+	   20000 20.0))
+	 (clusters
+	  (or
+	   (mapcar
+	    #'(lambda (idl) (send pcd :filter-with-indices idl :create t))
+	    idl)
+	   (list
+	    (let ((center (calc-centroid pcd)))
+	      (send pcd :filter-with-indices
+		    (filter-remove-indices
+		     pcd
+		     #'(lambda (v a b)
+			 (< (norm (v- v center)) 300)))
+		    :create t)))))
+	 (check-clusters
+	  (let ((buf (mapcar
+		      #'cons
+		      (mapcar #'calc-covariance clusters)
+		      clusters)))
+	    (print buf)
+	    (cond
+	     ((null (setq buf (remove-if remove-func buf)))
+	      (return-from min-covariance-cluster nil))
+	     (t buf))))
+	 (ret
+	  (car
+	   (sort check-clusters
+		 #'(lambda (a b)
+		     (< (funcall func (car a))
+			(funcall func (car b))))))))
+    ;;(print clusters)
+    ;;(dolist (cl clusters)
+    ;;(objects (list cl))
+    ;;(read-line))
+    (setf (aref eval 0) (funcall func (car ret)))
+    (setq ret (cdr ret))
+    (setq a clusters)
+    (if (and ret (send ret :colors))
+	(dotimes (i (send (send ret :colors) :get-val 'dim0))
+	  (setf (aref (send ret :colors) i 2) 0)
+	  (setf (aref (send ret :colors) i 1) 0)
+	  (setf (aref (send ret :colors) i 0) 1)))
+    ret))
+
+(defun oshibori-detection
+  nil
+  (do-until-key
+   (let ((tm (instance mtimer :init)) timer cent)
+     (if (not (ros::ok)) (return-from nil nil))
+     (ros::spin-once)
+     (cond
+      (*point-cloud*
+       (cond
+	((not (and (boundp '*viewer*) *viewer*))
+	 (objects (flatten (list *robot* *point-cloud*)))
+	 (send *irtviewer* :change-background #F(0.9 1 0.9))
+	 ))
+       (setq *pcd-reduce* *point-cloud*) ;;(resize-pcd *point-cloud*))
+       (if (pcd-check *pcd-reduce*) (setq *pcd-reachable* (remove-unreachable-pcd *pcd-reduce*)))
+       (if (pcd-check *pcd-reachable*) (setq *pcd-tabletop* (tabletop-object *pcd-reachable*)))
+       (if (pcd-check *pcd-tabletop*)
+	   (setq *pcd-tabletop++* (random-fatten-pcd *pcd-tabletop* :target-size 10)))
+       ;;(resize-pcd *pcd-tabletop* :min 10000 :max 10000)))
+       (if (pcd-check *pcd-tabletop++*) (setq *pcd-min-cov* (min-covariance-cluster *pcd-tabletop++*)))
+       (send *irtviewer* :objects nil)
+       (send *irtviewer* :objects *robot*)
+       (send *irtviewer* :objects *table-circle*)
+       (send *irtviewer* :objects *pcd-reduce*)
+       (if (pcd-check *pcd-tabletop++*) (send *irtviewer* :objects *pcd-tabletop++*))
+       (if (pcd-check *pcd-min-cov*) (send *irtviewer* :objects *pcd-min-cov*))
+       (send *viewer* :draw-objects :flush nil)
+       (cond
+	((pcd-check *pcd-min-cov*)
+	 (setq cent (calc-centroid *pcd-min-cov*))
+	 (send cent :draw-on :flush nil :color #F(0 1 0) :size 1000)
+	 (ros::publish
+	  "/oshibori/position"
+	  (instance std_msgs::float32multiarray
+		    :init
+		    :data cent))
+	 ))
+       (send *viewer* :viewsurface :flush)
+       ))
+     (x::window-main-one)
+     (if (< (setq timer (send tm :stop)) *time-step*)
+	 (unix:usleep (round (* 1000 1000 (- *time-step* timer))))
+       (format t "overslept ~A~%" timer))
+     )))
+
+(ros::advertise
+ "/oshibori/position"
+ std_msgs::float32multiarray
+ )
+
+(oshibori-detection)
+

@@ -1,0 +1,10 @@
+<launch>
+  <include
+      file="$(find rosbridge_server)/launch/rosbridge_websocket.launch">
+    <arg name="address" value="127.0.0.1" />
+    <arg name="port" value="9090" />
+  </include>
+  <node pkg="baxter_bartender" type="simple_controller.sh"
+	name="simple_controller_www"
+        output="screen" />
+</launch>
