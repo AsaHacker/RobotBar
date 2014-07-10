@@ -2,14 +2,16 @@
 install
 ===================
 
-* type the following command.
+* type the following command.::
+
   . install.sh
 
 usage
 ===================
 
 * text2wave-jp file generates wav file from JP string.
-* sample
+* sample::
+
   ./text2wave "こんにちわ" && aplay tmp.wav
 
 thanks
