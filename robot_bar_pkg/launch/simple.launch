@@ -1,6 +1,10 @@
 <launch>
   <node name="simple" pkg="robot_bar_pkg" type="simple" output="screen"/>
-  <rosparam>
-    filename: "<directory>/simple.txt"
-  </rosparam>
+  <param
+      name="filename"
+      value="$(find robot_bar_pkg)/examples/simple.txt" >
+  </param>
+  <!-- <rosparam> -->
+  <!--   filename: "$(find robot_bar_pkg)/examples/simple.txt" -->
+  <!-- </rosparam> -->
 </launch>

@@ -3,6 +3,7 @@
 namespace simple {
 
 void simple::LoadScenario() {
+  std::cout << filename_.c_str() << std::endl ;
   std::ifstream file(filename_.c_str());
   std::string text;
   file >> size_;
@@ -10,12 +11,15 @@ void simple::LoadScenario() {
   for (int i=0; i<size_; ++i) {
     std::string text;
     file >> text;
-    char* text_c = new char[text.size()+1];
-    std::copy(text.begin(), text.end(), text_c);
-    text_c[text.size()] = '\0';
-    table_[i].key = std::string(strtok(text_c, ","));
-    table_[i].output.data = std::string(strtok(NULL, "\n"));
-    delete text_c;
+    // char* text_c = new char[text.size()+1];
+    // std::copy(text.begin(), text.end(), text_c);
+    // text_c[text.size()] = '\0';
+    int comma_position = text.find(",") ;
+    table_[i].key = text.substr(0,comma_position) ;
+    table_[i].output.data = text.substr(comma_position+1, text.size()) ; // std::string(strtok(text_c, "\n")
+    // table_[i].key = std::string(strtok(text_c, ","));
+    // table_[i].output.data = std::string(strtok(NULL, "\n"));
+    // delete text_c;
   }
   file.close();
 }
