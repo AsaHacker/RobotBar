@@ -1,0 +1,6 @@
+<launch>
+  <node name="simple" pkg="robot_bar_pkg" type="simple" output="screen"/>
+  <rosparam>
+    filename: "<directory>/simple.txt"
+  </rosparam>
+</launch>
