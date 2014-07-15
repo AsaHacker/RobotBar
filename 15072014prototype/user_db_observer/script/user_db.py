@@ -4,6 +4,7 @@ import rospy
 import json
 from std_msgs.msg import String
 from std_msgs.msg import Int32
+from std_msgs.msg import Empty
 
 user_name_pub = ""
 user_level_pub = ""
@@ -24,10 +25,21 @@ def level_up_callback(data):
   json.dump(user_db,f)
   f.close()
 
+def user_name_callback(data):
+  tmp = 0
+  for d in user_db:
+    if ( d["user_name"] == data.data ):
+      user_id = tmp
+      print "welcome" + " " + data.data
+      return
+    tmp = tmp + 1
+  print "who are you? > " + data.data
+
 def set_listener():
   rospy.init_node('user_db_observer', anonymous=True)
   rospy.Subscriber("user_db_observer/set_level", Int32, level_change_callback)
-  rospy.Subscriber("user_db_observer/levelup_event", Int32, level_up_callback)
+  rospy.Subscriber("user_db_observer/levelup_event", Empty, level_up_callback)
+  rospy.Subscriber("/user_db_observer/set_user_name", String, user_name_callback)
   ## rospy.spin()
 
 if __name__ == '__main__':
