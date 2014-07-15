@@ -2,12 +2,13 @@
 
 import rospy
 from std_msgs.msg import String
+from std_msgs.msg import Empty
 
 pub = ""
 
 def callback(data):
   print data.data
-  pub.publish(String(data.data))
+  pub.publish(Empty())
 
 def listener():
   rospy.init_node('set_phrase_talker_listener', anonymous=True)
@@ -15,5 +16,5 @@ def listener():
   rospy.spin()
 
 if __name__ == '__main__':
-  pub = rospy.Publisher('levelup_event', String)
+  pub = rospy.Publisher('user_db_observer/levelup_event', Empty)
   listener()
