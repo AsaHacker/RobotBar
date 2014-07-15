@@ -1,10 +1,10 @@
 <launch>
-  <node name="simple" pkg="robot_bar_pkg" type="simple" output="screen"/>
+  <node name="simple" pkg="set_phrase_talker" type="simple" output="screen"/>
   <param
       name="filename"
-      value="$(find robot_bar_pkg)/examples/simple.txt" >
+      value="$(find set_phrase_talker)/examples/simple.txt" >
   </param>
   <!-- <rosparam> -->
-  <!--   filename: "$(find robot_bar_pkg)/examples/simple.txt" -->
+  <!--   filename: "$(find set_phrase_talker)/examples/simple.txt" -->
   <!-- </rosparam> -->
 </launch>

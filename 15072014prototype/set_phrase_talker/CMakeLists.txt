@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(robot_bar_pkg)
+project(set_phrase_talker)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
@@ -20,7 +20,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES robot_bar_pkg
+#  LIBRARIES set_phrase_talker
 #  CATKIN_DEPENDS roscpp rospy std_msgs
 #  DEPENDS system_lib
 )

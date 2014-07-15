@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>robot_bar_pkg</name>
+  <name>set_phrase_talker</name>
   <version>0.0.0</version>
-  <description>The robot_bar_pkg package</description>
+  <description>The set_phrase_talker package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
   <!-- Example:  -->
@@ -19,7 +19,6 @@
   <!-- Url tags are optional, but mutiple are allowed, one per tag -->
   <!-- Optional attribute type can be: website, bugtracker, or repository -->
   <!-- Example: -->
-  <!-- <url type="website">http://wiki.ros.org/robot_bar_pkg</url> -->
 
 
   <!-- Author tags are optional, mutiple are allowed, one per tag -->
