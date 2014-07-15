@@ -17,9 +17,17 @@ def level_change_callback(data):
   json.dump(user_db,f)
   f.close()
 
-def listener():
+def level_up_callback(data):
+  print data.data
+  user_db[user_id]["level"] = user_db[user_id]["level"] + 1
+  f = open("user_db.json","w")
+  json.dump(user_db,f)
+  f.close()
+
+def set_listener():
   rospy.init_node('user_db_observer', anonymous=True)
-  rospy.Subscriber("level", Int32, level_change_callback)
+  rospy.Subscriber("user_db_observer/set_level", Int32, level_change_callback)
+  rospy.Subscriber("user_db_observer/levelup_event", Int32, level_up_callback)
   ## rospy.spin()
 
 if __name__ == '__main__':
@@ -29,7 +37,7 @@ if __name__ == '__main__':
   user_db = json.load(f)
   f.close()
   print(user_db)
-  listener()
+  set_listener()
   while(not rospy.is_shutdown()):
     rospy.sleep(1)
     user_name_pub.publish(String(user_db[user_id]["user_name"]))
