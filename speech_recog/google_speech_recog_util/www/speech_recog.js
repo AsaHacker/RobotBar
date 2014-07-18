@@ -18,6 +18,19 @@ var speech_recog = function(opt){
         messageType: 'std_msgs/String'
     });
 
+    this.status_topic = new ROSLIB.Topic({
+        ros: this.ros,
+        name: "speech_recog/status/string",
+        messageType: 'std_msgs/String'
+    });
+
+    speech_recog.prototype.status_publish = function(st){
+	var st_msg = new ROSLIB.Message(
+            {data: st}
+        );
+	this.status_topic.publish(st_msg) ;
+    };
+	
     speech_recog.prototype.speech_publish = function(best, all, rate){
         var best_msg = new ROSLIB.Message(
             {data: best}
@@ -38,35 +51,6 @@ var speech_recog = function(opt){
             );
 	    this.all_topic.publish(all_msg) ;
 	}
-    };
-
-    // for google speech recog
-    this.google_recognizer = new webkitSpeechRecognition();
-    this.google_recognizer.lang = "ja-JP";
-    this.google_recognizer.interimResults = true;
-    this.google_recognizer.continuous = true;
-    this.google_recognizer.maxAlternatives = 10;
-
-    this.google_recognizer.onsoundstart = function(){
-	$("#state").text("speech detect");
-    };
-    this.google_recognizer.onnomatch = function(){
-	$("#recognizedText").text("no match");
-    };
-    this.google_recognizer.onerror = function(event) {
-	$("#recognizedText").text("error");
-	if (event.error == 'no-speech') {
-	    console.log('info_no_speech');
-	}
-	if (event.error == 'audio-capture') {
-	    console.log('info_no_microphone');
-	}
-	if (event.error == 'not-allowed') {
-            console.log('info_denied');
-	}
-    };
-    this.google_recognizer.onsoundend = function(){
-	$("#statet").text("idle");
     };
 
     speech_recog.prototype.onresult = function(event){
@@ -97,7 +81,36 @@ var speech_recog = function(opt){
 	}
     };
 
-    this.google_recognizer.onresult = this.onresult.bind(this) ;
+    speech_recog.prototype.onsoundstart = function(){
+	$("#state").text("speech detect");
+	this.status_publish("speech") ;
+    }
+
+    speech_recog.prototype.onnomatch = function(){
+	$("#state").text("no match");
+	this.status_publish("nomatch") ;
+    }
+    
+    speech_recog.prototype.onerror = function(event) {
+	$("#recognizedText").text("error");
+	if (event.error == 'no-speech') {
+	    console.log('info_no_speech');
+	    this.status_publish("nospeech") ;
+	}
+	if (event.error == 'audio-capture') {
+	    console.log('nomic');
+	    this.status_publish("nomic") ;
+	}
+	if (event.error == 'not-allowed') {
+            console.log('forbit');
+	    this.status_publish("nopermission") ;
+	}
+    };
+
+    speech_recog.prototype.onsoundend = function(){
+	$("#statet").text("idle");
+	this.status_publish("idle") ;
+    };
     
     speech_recog.prototype.start = function(){
 	this.google_recognizer.start() ;
@@ -106,6 +119,19 @@ var speech_recog = function(opt){
     speech_recog.prototype.stop = function(){
 	this.google_recognizer.stop() ;
     } ;
+
+    // for google speech recog
+    this.google_recognizer = new webkitSpeechRecognition();
+    this.google_recognizer.lang = "ja-JP";
+    this.google_recognizer.interimResults = true;
+    this.google_recognizer.continuous = true;
+    this.google_recognizer.maxAlternatives = 10;
+
+    this.google_recognizer.onsoundstart = this.onsoundstart.bind(this) ;
+    this.google_recognizer.onnomatch = this.onnomatch.bind(this) ;
+    this.google_recognizer.onerror = this.onerror.bind(this) ;
+    this.google_recognizer.onsoundend = this.onsoundend.bind(this);
+    this.google_recognizer.onresult = this.onresult.bind(this) ;
 
 }
 
