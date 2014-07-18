@@ -1,0 +1,14 @@
+<launch>
+
+  <node pkg="usb_cam"
+	type="usb_cam_node"
+	name="usb_cam_node"
+	args="/usb_cam_node/image_raw/compressed:=/face_detector/image/compressed"
+	output="screen" />
+
+  <node pkg="opencv_face_recog_node"
+	type="face_detect_node"
+	name="face_detect_node"
+	output="screen" />
+
+</launch>

@@ -1,0 +1,29 @@
+<launch>
+
+  <node pkg="opencv_face_recog_node" type="heat_beater.sh" name="heat_beater"
+        output="screen" />
+
+  <node pkg="roseus" type="roseus" name="pad_emotion"
+        args="$(find opencv_face_recog_node)/bin/pad_emotion.l"
+        output="screen" />
+  <node pkg="roseus" type="roseus" name="voice_echo"
+        args="$(find opencv_face_recog_node)/bin/voice_echo.l"
+        output="screen" />
+  <node pkg="roseus" type="roseus" name="talk_sample"
+        args="$(find opencv_face_recog_node)/euslisp/talk_sample.l"
+        output="screen" />
+
+  <node pkg="opencv_face_recog_node"
+	type="run_jar.sh"
+	name="face_pad"
+	args="$(find opencv_face_recog_node)/bin/FacePAD.jar -r $(env ROS_IP) -m $(env ROS_MASTER_URI) -t face_pad_node/compressed_image:=/kubi_sample/compressed_image"
+	output="screen" />
+
+  <node pkg="opencv_face_recog_node"
+	type="run_jar.sh"
+	name="kubi_interface"
+	args="$(find opencv_face_recog_node)/bin/KubiInterface.jar -r $(env ROS_IP) -m $(env ROS_MASTER_URI) -w"
+	output="screen" />
+
+  <include file="$(find opencv_face_recog_node)/launch/face_detect.launch" />
+</launch>
