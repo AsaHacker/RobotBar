@@ -1,0 +1,33 @@
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>test</title>
+    <script type="text/javascript"
+	    src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+    <script type="text/javascript"
+	    src="http://cdn.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
+    <script type="text/javascript"
+	    src="http://cdn.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
+    <script type="text/javascript" src="speech_recog.js"></script>
+  </head>
+  <body>
+    <h3>test</h3>
+    <div class="blueBox">
+      <input type="button" value="start" onclick="recognition.start();"/>
+      <input type="button" value="stop" onclick="recognition.stop();"/>
+      <div id="state">idle</div>
+      <div id="recognizedText"></div>
+      <div id="recognizedDetail"></div>
+    </div>
+    <!-- -->
+    <div style="position: absolute;
+                bottom: 0px; right: 0px;
+                font-size: 5pt; ">
+      do not forget the following command:
+      <span style="color: #FF0000;">
+        roslaunch rosbridge_server rosbridge_websocket.launch
+      </span>
+    </div>
+  </body>
+</html>
+
