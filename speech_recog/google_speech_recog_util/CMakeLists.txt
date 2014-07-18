@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(user_db_observer)
+project(google_speech_recog_util)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
@@ -15,4 +15,8 @@ include_directories(
 )
 
 ## add_executable(simple src/unreleased/simple.cc)
+
+# target_link_libraries(simple
+#   ${catkin_LIBRARIES}
+# )
 
