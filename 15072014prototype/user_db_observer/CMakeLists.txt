@@ -16,7 +16,3 @@ include_directories(
 
 ## add_executable(simple src/unreleased/simple.cc)
 
-target_link_libraries(simple
-  ${catkin_LIBRARIES}  
-)
-
