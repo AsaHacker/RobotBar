@@ -3,7 +3,7 @@
 (ros::load-ros-manifest "jsk_gui_msgs")
 
 (defvar *text2wave-jp-path*
-  (format nil "~A/demo/s-noda/mmd" (read-line (piped-fork "rospack find euslib"))))
+  (format nil "~A" (read-line (piped-fork "rospack find mei_talk_util"))))
 
 (defun voice-message-callback
   (msg)
