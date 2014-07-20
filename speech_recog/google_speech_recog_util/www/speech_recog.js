@@ -136,3 +136,11 @@ var speech_recog = function(opt){
 }
 
 var recognition = new speech_recog() ;
+
+// auto start
+recognition.onsoundend = function(){
+    $("#statet").text("idle");
+    recognition.status_publish("idle") ;
+    recognition.start() ;
+};
+recognition.start() ;
