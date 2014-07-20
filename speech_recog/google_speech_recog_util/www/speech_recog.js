@@ -56,13 +56,14 @@ var speech_recog = function(opt){
     speech_recog.prototype.onresult = function(event){
 	var results = event.results;
 	for (var i = event.resultIndex; i<results.length; i++){
+	    console.log(results[i][0].transcript) ;
             if(results[i].isFinal){
 		$("#recognizedText").text(results[i][0].transcript);
+		// this.speech_publish( results[i][0].transcript, [], [] ) ;
             }
             else{
 		$("#recognizedText").text(results[i][0].transcript);
             }
-	    this.speech_publish( results[i][0].transcript, [], [] ) ;
 	}
 	$("#recognizedDetail").empty();
 	var str_buf = new Array() ;
@@ -124,7 +125,7 @@ var speech_recog = function(opt){
     this.google_recognizer = new webkitSpeechRecognition();
     this.google_recognizer.lang = "ja-JP";
     // this.google_recognizer.interimResults = true;
-    this.google_recognizer.continuous = true;
+    // this.google_recognizer.continuous = true;
     this.google_recognizer.maxAlternatives = 3;
     
     this.google_recognizer.onsoundstart = this.onsoundstart.bind(this) ;
@@ -138,9 +139,10 @@ var speech_recog = function(opt){
 var recognition = new speech_recog() ;
 
 // auto start
-recognition.onsoundend = function(){
-    $("#statet").text("idle");
-    recognition.status_publish("idle") ;
+recognition.google_recognizer.onend = function(){
+    //$("#statet").text("idle");
+    //recognition.status_publish("idle") ;
+    // setTimeout( "recognition.start()", 50 ) ;
     recognition.start() ;
 };
 recognition.start() ;
