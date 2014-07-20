@@ -123,10 +123,10 @@ var speech_recog = function(opt){
     // for google speech recog
     this.google_recognizer = new webkitSpeechRecognition();
     this.google_recognizer.lang = "ja-JP";
-    this.google_recognizer.interimResults = true;
+    // this.google_recognizer.interimResults = true;
     this.google_recognizer.continuous = true;
-    this.google_recognizer.maxAlternatives = 10;
-
+    this.google_recognizer.maxAlternatives = 3;
+    
     this.google_recognizer.onsoundstart = this.onsoundstart.bind(this) ;
     this.google_recognizer.onnomatch = this.onnomatch.bind(this) ;
     this.google_recognizer.onerror = this.onerror.bind(this) ;
