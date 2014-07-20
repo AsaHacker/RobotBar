@@ -14,7 +14,10 @@ res_pub = ""
 mecab_tagger = MeCab.Tagger (" ".join(sys.argv))
 
 def request_strint_callback(data):
-  res_pub.publish(String(mecab_tagger.parse(data.data)))
+  buf = mecab_tagger.parse(data.data)
+  print "---"
+  print buf
+  res_pub.publish(String(buf))
 
 if __name__ == '__main__':
   rospy.init_node('mecab_node', anonymous=True)
