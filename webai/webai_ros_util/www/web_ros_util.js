@@ -5,6 +5,41 @@ var webai_ros_util = function(opt){
     google.load("feeds",  "1");
     google.load("jquery", "1.4.3");
 
+    this.ros = new ROSLIB.Ros({
+        url: "ws://" + "vulpecula" + ":9090"
+    });
+
+    this.keyword_topic = new ROSLIB.Topic({
+        ros: this.ros,
+        name: "webai/keyword/string",
+        messageType: 'std_msgs/String'
+    });
+
+    this.search_request = new ROSLIB.Topic({
+	ros : this.ros,
+	name : 'webai/search_request/string',
+	messageType : 'std_msgs/String'
+    });
+
+    this.request_string_form ; 
+
+    this.search_request.subscribe(
+	function(message) {
+	    console.log( "subscribe " + message.data) ;
+	    if ( this.request_string_form ){
+		this.request_string_form.value = message.data ;
+	    }
+	    this.search(message.data) ;
+	}.bind(this)
+    );
+
+    webai_ros_util.prototype.keyword_publish = function(st){
+        var st_msg = new ROSLIB.Message(
+            {data: st}
+        );
+        this.keyword_topic.publish(st_msg) ;
+    };
+    
     this.$WA  = crocro.webAi;
     this.cWSrch   = new this.$WA.WebSrch();
     this.cJpKw    = new this.$WA.JpKw();
@@ -64,6 +99,7 @@ var webai_ros_util = function(opt){
 			document.getElementById("search_contents").innerHTML = buf ;
 		    }
 		    this.keywords = this.cJpKw.getStrArr({prmAll:true}) ;
+		    this.keyword_publish( this.keywords.join("\n") ) ;
 		    document.getElementById("search_keywords").innerHTML = this.keywords.join("<br />") ;
 		    //kwArr = cJpKw.getStrArr();
 		}.bind(this)
