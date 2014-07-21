@@ -1,0 +1,27 @@
+<HTML>
+  <HEAD>
+    <META HTTP-EQUIV="Content-type" CONTENT="text/html; charset=UTF-8">
+    <TITLE>web_ros_util</TITLE>
+    <script src="http://www.google.com/jsapi"
+	    type="text/javascript"></script>
+    <script src="http://crocro.com/write/web_ai/app/webAi_1.0/crocro.webAi.min.js"
+	    type="text/javascript" charset="UTF-8"></script>
+    <script src="http://crocro.com/write/web_ai/app/webAi_1.0/crocro.webAi.min.js"
+	    type="text/javascript" charset="UTF-8"></script>
+    <script src="web_ros_util.js" type="text/javascript"></script>
+  </HEAD>
+  <BODY>
+    <input type="text" id="qStr" value="すんすん" />
+    <input type="button" value="search"
+	   onClick="wru.search(document.getElementById('qStr').value) ;" />
+    <hr />
+    <div id="search_contents"
+	 style="float: left;
+		width: 50% ; height:100% ;
+		background-color: #FFAAFF ;">contents</div>
+    <div id="search_keywords"
+	 style="float: left;
+		width: 50% ; height:100% ;
+		background-color: #FFFFAA ;">keywords</div>
+  </BODY>
+</HTML>
