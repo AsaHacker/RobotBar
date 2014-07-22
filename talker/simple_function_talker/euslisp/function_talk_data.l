@@ -14,10 +14,39 @@
 	(list :hello
 	      "こんにちわ\\|こんにちは\\|ハロー\\|良い天気"
 	      (list "こんにちわ" "ご機嫌うるわしゅう"))
+	(list :duplicate4
+	      (list '(lambda (msg) (setq hoge msg))
+		    '(lambda (msg) (string-equal hoge msg))
+		    '(lambda (msg) (string-equal hoge msg))
+		    '(lambda (msg) (string-equal hoge msg))
+		    '(lambda (msg) (string-equal hoge msg))
+		    '(lambda (msg) (string-equal hoge msg))
+		    '(lambda (msg) (string-equal hoge msg))
+		    '(lambda (msg) (string-equal hoge msg))
+		    )
+	      (list "・・・・・・"))
+	(list :duplicate3
+	      (list '(lambda (msg) (setq hoge msg))
+		    '(lambda (msg) (string-equal hoge msg))
+		    '(lambda (msg) (string-equal hoge msg))
+		    '(lambda (msg) (string-equal hoge msg))
+		    '(lambda (msg) (string-equal hoge msg))
+		    '(lambda (msg) (string-equal hoge msg))
+		    '(lambda (msg) (string-equal hoge msg)))
+	      (list "別のことを言うまで、返事しませんからね"))
+	(list :duplicate2
+	      (list '(lambda (msg) (setq hoge msg))
+		    '(lambda (msg) (string-equal hoge msg))
+		    '(lambda (msg) (string-equal hoge msg))
+		    '(lambda (msg) (string-equal hoge msg))
+		    '(lambda (msg) (string-equal hoge msg)))
+	      (list "その言葉にはもうあきあきです"
+		    "私のことをバカだと思っていますね？"))
 	(list :duplicate
 	      (list '(lambda (msg) (setq hoge msg))
 		    '(lambda (msg) (string-equal hoge msg)))
-	      (list "同じことを言わないでください" "私のことをバカだと思っていますね？"))
+	      (list "同じことを言わないでください"
+		    "もう少しわかりやすくお願いできますか？"))
 	(list :weather
 	      "天気"
 	      (list "今日の天気は晴れです" "今日の天気は雨です"))
@@ -36,7 +65,7 @@
 	      (list "機械が悩みですか?" "機械をどう思うのですか？"
 		    "機械をどうしたいのですか？"))
 	(list :sorry
-	      "すいません\\|sorry\\|ソーリー\\|申し訳ない"
+	      "すいません\\|sorry\\|ソーリー\\|申し訳ない\\|ごめん\\|悪い\\|悪かった"
 	      (list "あやまらないでください"
 		    "謝る必要は有りません" "どうしてあやまるのです？"))
 	(list :remember
