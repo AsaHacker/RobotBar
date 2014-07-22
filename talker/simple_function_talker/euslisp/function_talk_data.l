@@ -69,7 +69,7 @@
 	      (list "あやまらないでください"
 		    "謝る必要は有りません" "どうしてあやまるのです？"))
 	(list :remember
-	      "思い出す\\|忘れられ\\|夢にみる\\|怖い"
+	      "思い出す\\|忘れられ\\|怖い"
 	      '(lambda (msg)
 		 (let* ((pd (regix-predicate "[思い出す|忘れられない]" (car (flatten msg)))))
 		   (cond
@@ -77,12 +77,66 @@
 		     (list (format nil "~Aについて他に何がありますか?" pd)
 			   (format nil "なぜ~Aなのですか?" pd)
 			   (format nil "例えばいつ~Aが思い出されますか?" pd)
-			   (format nil "~Aとはどういう関係ですか?" pd)))
-		    (t (list "他に何が思い出されますか？"))))))
+			   (format nil "~Aとはどういう関係ですか?" pd)
+			   (format nil "~Aですか" pd)
+			   ))
+		    (t (list "他に何が思い出されますか？")
+		       )))))
+	(list :if
+	      "もしも\\|もし\\|仮に\\|仮定として"
+	      (list
+	       "本当にそう思うのですか？"
+	       "それが望みなのですか？"))
+	(list :dream
+	      "夢"
+	      '(lambda (msg)
+		 (let* ((pd (regix-predicate "夢" (car (flatten msg)))))
+		   (cond
+		    (pd
+		     (list (format nil "以前にも~Aについて夢を見たことはありますか？" pd)
+			   (format nil "現実では~Aをどう思いますか？" pd)
+			   (format nil "~Aとはどういう関係ですか?" pd)
+			   (format nil "~Aですか" pd)
+			   ))
+		    (t (list "起きているときはどうですか？"
+			     "その夢にはどういう意味があると思いますか？"
+			     "どのくらいの頻度で？"
+			     "夢で何が起こりますか？"
+			     )
+		       )))))
+	(list :mother
+	      "母\\|お母さん\\|ママ"
+	      (list "他のご家族は？" "もっと家族のことを聞かせてください"))
+	(list :father
+	      "父\\|お父さん\\|パパ"
+	      (list "他のご家族は？" "もっと家族のことを聞かせてください"))
+	(list :want
+	      "望み\\|望む\\|欲しい\\|求める\\|必要\\|好き"
+	      '(lambda (msg)
+		 (let* ((pd (regix-predicate "望み\\|望む\\|欲しい\\|求める"
+					     (car (flatten msg)))))
+		   (cond
+		    (pd
+		     (list (format nil "~Aは手に入りそうですか？" pd)
+			   (format nil "なぜ~Aが欲しいのですか？" pd)
+			   ))
+		    (t (list "どうしてそれが必要なのですか？"
+			     "いいものですよね")
+		       )))))
+	(list :grad
+	      "嬉し\\|楽し\\|喜"
+	      (list "ええ、私もです" "どうして楽しいのか教えてくれますか？"))
+	(list :sad
+	      "悲し\\|涙\\|寂し"
+	      (list "お気の毒に" "同情します" "変なことを聞いてしまいましたか？"))
+	(list :same
+	      "似て\\|そっくり\\|同じ"
+	      (list "どこがですか？" "本当に似ていると思いますか？"
+		    "他の関連性はどうでしょう？"))
 	)
 
-	;;
-	;; error
+       ;;
+       ;; error
        (list
 	(list :nomatch #'(lambda (&rest args) t)
 	      (list "別の言葉で言い換えてください"
@@ -93,47 +147,6 @@
        ))
 
 #|
-
-	(((?* ?x) do you remember (?* ?y))
-	 (Did you think I would forget ?y ?)
-	 (Why do you think I should recall ?y now)
-	 (What about ?y) (You mentioned ?y))
-	(((?* ?x) if (?* ?y))
-	 (Do you really think its likely that ?y) (Do you wish that ?y)
-	 (What do you think about ?y) (Really-- if ?y))
-	(((?* ?x) I dreamt (?* ?y))
-	 (Really-- ?y) (Have you ever fantasized ?y while you were awake?)
-	 (Have you dreamt ?y before?))
-	(((?* ?x) dream about (?* ?y))
-	 (How do you feel about ?y in reality?))
-	(((?* ?x) dream (?* ?y))
-	 (What does this dream suggest to you?) (Do you dream often?)
-	 (What persons appear in your dreams?)
-	 (Don't you believe that dream has to do with your problem?))
-	(((?* ?x) my mother (?* ?y))
-	 (Who else in your family ?y) (Tell me more about your family))
-	(((?* ?x) my father (?* ?y))
-	 (Your father) (Does he influence you strongly?)
-	 (What else comes to mind when you think of your father?))
-	(((?* ?x) I want (?* ?y))
-	 (What would it mean if you got ?y)
-	 (Why do you want ?y) (Suppose you got ?y soon))
-	(((?* ?x) I am glad (?* ?y))
-	 (How have I helped you to be ?y) (What makes you happy just now)
-	 (Can you explain why you are suddenly ?y))
-	(((?* ?x) I am sad (?* ?y))
-	 (I am sorry to hear you are depressed)
-	 (I'm sure its not pleasant to be sad))
-	(((?* ?x) are like (?* ?y))   
-	 (What resemblance do you see between ?x and ?y))
-	(((?* ?x) is like (?* ?y))    
-	 (In what way is it that ?x is like ?y)
-	 (What resemblance do you see?)
-	 (Could there really be some connection?) (How?))
-	(((?* ?x) alike (?* ?y))      
-	 (In what way?) (What similarities are there?))
-	(((?* ?x) same (?* ?y))       
-	 (What other connections do you see?))
 
    (((?* ?x) I was (?* ?y))       
     (Were you really?) (Perhaps I already knew you were ?y)
