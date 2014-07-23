@@ -6,7 +6,7 @@ var webai_ros_util = function(opt){
     google.load("jquery", "1.4.3");
 
     this.ros = new ROSLIB.Ros({
-        url: "ws://" + "vulpecula" + ":9090"
+        url: "ws://" + "127.0.0.1" + ":9090"
     });
 
     this.keyword_topic = new ROSLIB.Topic({
