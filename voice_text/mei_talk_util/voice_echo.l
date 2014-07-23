@@ -5,6 +5,7 @@
 
 (defvar *text2wave-jp-path*
   (format nil "~A" (read-line (piped-fork "rospack find mei_talk_util"))))
+(defvar *text-cnt* 0)
 
 (defun voice-message-callback
   (msg)
@@ -18,13 +19,21 @@
 
 (defun mei-voice-message-callback
   (msg)
-  ;;(print msg)
-  (unix:system
-   (format nil "ROOT_DIR=~A ~A/text2wave-jp ~A happy /tmp/~A.wav && aplay /tmp/~A.wav"
-	   *text2wave-jp-path*
-	   *text2wave-jp-path*
-	   (send msg :data) (send msg :data) (send msg :data))
-   ))
+  ;; (setq *text-cnt* (mod *text-cnt* 30))
+  (incf *text-cnt*)
+  (cond
+   ((> *text-cnt* 30)
+    (unix:system "rm -rf /tmp/*.wav")
+    (setq *text-cnt* 0)))
+  (let ((text (remove-if #'(lambda (a) (find a (list #\ ))) (send msg :data))))
+    (unix:system
+     (format nil "ROOT_DIR=~A ~A/text2wave-jp ~A happy /tmp/~A.wav && aplay /tmp/~A.wav"
+	     *text2wave-jp-path*
+	     *text2wave-jp-path*
+	     (remove-if #'(lambda (a) (find a (list #\ ))) (send msg :data))
+	     *text-cnt*
+	     *text-cnt*)
+     )))
 
 ;; (ros::subscribe
 ;;  "/voice_echo/mei"
