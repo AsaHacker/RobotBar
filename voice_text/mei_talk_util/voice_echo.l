@@ -20,10 +20,10 @@
   (msg)
   ;;(print msg)
   (unix:system
-   (format nil "ROOT_DIR=~A ~A/text2wave-jp ~A happy /tmp/tmp.wav && aplay /tmp/tmp.wav"
+   (format nil "ROOT_DIR=~A ~A/text2wave-jp ~A happy /tmp/~A.wav && aplay /tmp/~A.wav"
 	   *text2wave-jp-path*
 	   *text2wave-jp-path*
-	   (send msg :data))
+	   (send msg :data) (send msg :data) (send msg :data))
    ))
 
 ;; (ros::subscribe
