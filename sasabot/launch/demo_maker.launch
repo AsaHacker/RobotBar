@@ -1,4 +1,4 @@
 <launch>
-  <node name="file_handler" pkg="ssb_proj_pkg" type="file_handler.py" />
-  <node name="wav_handler" pkg="ssb_proj_pkg" type="wav_handler.py" />
+  <node name="file_handler" pkg="sasabot" type="file_handler.py" />
+  <node name="wav_handler" pkg="sasabot" type="wav_handler.py" />
 </launch>

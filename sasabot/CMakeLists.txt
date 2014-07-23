@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 set(CMAKE_EXE_LINKER_FLAGS "-llua -lluabind ofx/libs/openFrameworksCompiled/lib/osx/libopenFrameworks.a  -Fofx/libs/glut/lib/osx/  -mmacosx-version-min=10.7 -framework Accelerate -framework QTKit -framework GLUT -framework AGL -framework ApplicationServices -framework AudioToolbox -framework Carbon -framework CoreAudio -framework CoreFoundation -framework CoreServices -framework OpenGL -framework QuickTime -framework IOKit -framework Cocoa -framework CoreVideo  ofx/libs/FreeImage/lib/osx/freeimage.a  ofx/libs/assimp/lib/osx/assimp.a  ofx/libs/cairo/lib/osx/cairo-script-interpreter.a  ofx/libs/cairo/lib/osx/cairo.a  ofx/libs/cairo/lib/osx/pixman-1.a  ofx/libs/freetype/lib/osx/freetype.a ofx/libs/glew/lib/osx/glew.a  ofx/libs/glfw/lib/osx/libglfw3.a  ofx/libs/openssl/lib/osx/crypto.a  ofx/libs/openssl/lib/osx/ssl.a  ofx/libs/poco/lib/osx/PocoCrypto.a ofx/libs/poco/lib/osx/PocoData.a  ofx/libs/poco/lib/osx/PocoDataODBC.a  ofx/libs/poco/lib/osx/PocoDataSQLite.a ofx/libs/poco/lib/osx/PocoFoundation.a ofx/libs/poco/lib/osx/PocoNet.a  ofx/libs/poco/lib/osx/PocoNetSSL.a  ofx/libs/poco/lib/osx/PocoUtil.a  ofx/libs/poco/lib/osx/PocoXML.a  ofx/libs/poco/lib/osx/PocoZip.a  ofx/libs/rtAudio/lib/osx/rtAudio.a  ofx/libs/tess2/lib/osx/tess2.a  /System/Library/PrivateFrameworks/MultitouchSupport.framework/MultitouchSupport  ofx/libs/fmodex/lib/osx/libfmodex.dylib -lobjc")
-project(ssb_proj_pkg) 
+project(sasabot) 
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
@@ -22,7 +22,7 @@ find_package(OpenCV)
 ###################################
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES ssb_proj_pkg
+#  LIBRARIES sasabot
 #  CATKIN_DEPENDS roscpp std_msgs
 #  DEPENDS system_lib
 )
