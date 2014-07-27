@@ -23,14 +23,19 @@ def tweet(data):
 
 def check_replies():
     global prev_reply_ids
-    buf = api.GetReplies()
+    ## buf = api.GetReplies()
+    buf = api.GetMentions()
     if prev_reply_ids:
         for rep in buf:
             if rep.user.screen_name:
                 print rep.user.screen_name + " says " + rep.text
-                if not rep.id in prev_reply_ids and key["username"] in rep.text:
-                    print "pub"
-                    rep_pub.publish(String(rep.in_reply_to_screen_name + "\n" + rep.text))
+            else:
+                print "somebady says " + rep.text
+            if not rep.id in prev_reply_ids and key["username"] in rep.text:
+                print "pub"
+                text = rep.text.replace("\n","")
+                text = rep.text.replace("\r","")
+                rep_pub.publish(String(rep.in_reply_to_screen_name + " " + text))
     else:
         print "empty"
     prev_reply_ids = map(lambda x:x.id, buf)
