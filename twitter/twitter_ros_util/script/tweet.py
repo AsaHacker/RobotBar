@@ -48,7 +48,7 @@ if __name__ == '__main__':
                       access_token_secret=key["access_secret"])
     prev_reply_ids = []
     rep_pub = rospy.Publisher('twitter/reply/string', String)
-    rospy.Subscriber("robotbar/tweet/string", String, tweet)
+    rospy.Subscriber("twitter/tweet/string", String, tweet)
     ## rospy.spin()
     while(not rospy.is_shutdown()):
         check_replies()
