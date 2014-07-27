@@ -96,7 +96,7 @@
 (ros::rate 3)
 (do-until-key
  (if (not (ros::ok)) (return-from nil nil))
- (print 'running)
+ ;; (print 'running)
  (ros::spin-once)
  (ros::sleep)
  )

@@ -39,3 +39,28 @@
 (regix-split "[^ァ-ヶa-zA-Z一-龠]\\+" "最近夫の帰りが遅くて体調が心配です" "\\n")
 (regix-split "\\([^ァ-ヶa-zA-Z\\一-龠]\\+\\)"
 	     "最近夫の帰りが遅くて体調が心配です" "\\n\\1\\n")
+
+(defun regix-split
+  (pat str
+       &optional
+       (replace "\\n")
+       (replace-buf "<newline>"))
+  (let* ((sed (piped-fork
+	       ;; (format nil "echo \"~A\" | sed s/\"~A\"/\"\\~A\"/g" str pat replace)))
+	       (print (format nil
+			      (format nil "~A | ~A" ;; ~A"
+				      "echo -n \"~A\""
+				      "sed -e \"s/~A/~A/g\""
+				      ;; "sed -e \"s/~A/~A/g\""
+				      ;;"sed -e \"s/~A/~A/g\""
+				      )
+			      str
+			      ;; "\n" replace-buf
+			      pat replace
+			      ;;replace-buf replace
+			      ))))
+	 buf ret)
+    (while (setq buf (read-line sed nil))
+      (push buf ret))
+    (close sed)
+    ret))
