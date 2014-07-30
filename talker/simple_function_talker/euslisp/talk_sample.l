@@ -1,14 +1,16 @@
+#!/usr/bin/env roseus
+
 
 ;; #-:jsk (jsk)
 ;; #-:rbrain-basic (rbrain)
 
 (ros::roseus "talk_sample_node")
 (ros::load-ros-manifest "std_msgs")
-(ros::load-ros-manifest "jsk_gui_msgs")
+;; (ros::load-ros-manifest "jsk_gui_msgs")
 
 (defvar *response-key-pairs*)
-(require "function_talk_data.l")
-(require "regix-util.l")
+(require "package://simple_function_talker/euslisp/function_talk_data.l")
+(require "package://simple_function_talker/euslisp/regix-util.l")
 
 (defvar *msg-queue* nil)
 (defvar *msg-queue-length* 100)
@@ -20,7 +22,7 @@
       (setq *msg-queue* (subseq *msg-queue* 0 *msg-queue-length*)))
   (format t "[talk_sample] input ~A~%" str-list)
   (ros::publish
-   "/voice_echo/mei"
+   "/function_talker/response/string"
    (instance
     std_msgs::string
     :init
@@ -79,22 +81,22 @@
      ((listp response) (nth (random (length response)) response))
      (t "ぬる"))))
 
-(ros::advertise "/voice_echo/mei" std_msgs::string)
+(ros::advertise "/function_talker/response/string" std_msgs::string)
 
 (ros::subscribe
  "/function_talker/request/string"
  std_msgs::string
  #'string-message-callback 1)
 
-(ros::subscribe
- "/Tablet/voice"
- jsk_gui_msgs::VoiceMessage
- #'voice-message-callback 1)
+;; (ros::subscribe
+;;  "/Tablet/voice"
+;;  jsk_gui_msgs::VoiceMessage
+;;  #'voice-message-callback 1)
 
 (ros::rate 3)
 (do-until-key
  (if (not (ros::ok)) (return-from nil nil))
- (print 'running)
+ ;; (print 'running)
  (ros::spin-once)
  (ros::sleep)
  )

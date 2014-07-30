@@ -1,0 +1,11 @@
+<launch>
+  <node pkg="twitter_ros_util" type="tweet.py" name="twitter_ros_client"
+        output="screen">
+    <env name="TWITTER_CONF_PATH" value="$(find twitter_ros_util)/script" />
+    <remap from="twitter/reply/string" to="/function_talker/request/string" />
+  </node>
+  <node pkg="simple_function_talker" type="talk_sample.l" name="simple_talker"
+        output="screen">
+    <remap from="/function_talker/response/string" to="twitter/tweet/string" />
+  </node>
+</launch>
