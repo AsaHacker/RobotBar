@@ -1,0 +1,8 @@
+<launch>
+  <node pkg="sound_play" type="sound_play" name="local_sound_play">
+    <remap from="/audio" to="/audio_out" />
+  </node>
+  <node pkg="sound_capture" type="sound_capture" name="local_sound_capture">
+    <remap from="/audio" to="/audio_in" />
+  </node>
+</launch>
