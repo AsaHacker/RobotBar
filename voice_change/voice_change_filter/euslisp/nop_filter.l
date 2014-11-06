@@ -1,15 +1,13 @@
 #!/usr/bin/env roseus
 
-(ros::roseus "audio_reverse_filtere")
+(ros::roseus "audio_nop_filtere")
 
 (ros::load-ros-manifest "audio_common_msgs")
 
 (defun audio-callback
   (msg)
   ;; (print msg))
-  (ros::publish "/audio_out"
-		(instance audio_common_msgs::audiodata :init
-			  :data (reverse (send msg :data))))
+  (ros::publish "/audio_out" msg)
   )
 
 (ros::subscribe "/audio_in"
@@ -21,7 +19,8 @@
 		10)
 
 (ros::rate 100)
+;;(ros::spin)
 (do-until-key
- (if (not (ros::ok)) (return-from nil nil))
- (ros::spin-once)
- (ros::sleep))
+  (if (not (ros::ok)) (return-from nil nil))
+  (ros::spin-once)
+  (ros::sleep))
