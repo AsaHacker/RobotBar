@@ -18,7 +18,39 @@
 (defun float-vector2byte-array
   (fv barray &key (scale 1.0))
   (dotimes (i (length barray))
-    (setf (aref barray i) (round (* scale (aref fv i))))))
+    (setf (aref barray i)
+	  (max 0 (min (round (* scale (aref fv i))) 255)))))
+
+(defun linear-gain-tune
+  (start end fv
+	 &key
+	 (size (/ (length fv) 2))
+	 buf)
+  (dotimes (i size)
+    (setq buf (/ i (- size 1.0)))
+    (setq gain (+ (* buf end)
+		  (* (- 1 buf) start)))
+    ;; (format t " gain ~A vs ~A~%" i gain)
+    (dotimes (j 2)
+      (setf (aref fv (+ j (* 2 i)))
+	    (* gain (aref fv (+ j (* 2 i))))))))
+
+(defun right-shift-array
+  (step fv
+	&key
+	(n (length fv))
+	(size (/ n 2))
+	buf i)
+  (dotimes (_i size)
+    (setq i (- (- size _i) 1))
+    (dotimes (j 2)
+      (cond
+       ((< i step)
+	(setf (aref fv (+ j (* 2 i))) 0))
+       (t
+	(setf (aref fv (+ j (* 2 i)))
+	      (aref fv (+ j (* 2 (- i step)))))))))
+  )
 
 ;; (defun convert-test
 ;;   nil
@@ -41,11 +73,15 @@
       (format t "[fourie-filter] update buffer size ~A -> ~A~%"
 	      (length *amp-data*) n)
       (setq *amp-data* (instantiate float-vector n))
-      (*amp-data-string* (instantiate string n))
+      (setq *amp-data-string* (instantiate string n))
       (setq *freq-data* (instantiate float-vector (* 2 n)))))
     (byte-array2float-vector a *amp-data*)
     (fft-forward *amp-data* *freq-data* n)
     ;; impl
+    ;; (linear-gain-tune 0.9 1.1 *freq-data*)
+    (right-shift-array 100 *freq-data*)
+    ;; (linear-gain-tune 0.0 1.0 *freq-data* :size 100)
+    ;;
     (fft-backward *freq-data* *amp-data* n)
     (float-vector2byte-array *amp-data* *amp-data-string*
 			     :scale (/ 1.0 n))
