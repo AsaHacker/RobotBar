@@ -32,6 +32,7 @@ import org.ros.node.topic.Publisher;
 public class MicNode extends AbstractNodeMain {
 
 	private TargetDataLine targetDataLine;
+	private MicTest mic;
 
 	@Override
 	public GraphName getDefaultNodeName() {
@@ -48,7 +49,7 @@ public class MicNode extends AbstractNodeMain {
 	@Override
 	public void onStart(final ConnectedNode connectedNode) {
 
-		final MicTest mic = new MicTest();
+		this.mic = new MicTest();
 		try {
 			this.targetDataLine = mic.setupTarget();
 		} catch (LineUnavailableException e) {

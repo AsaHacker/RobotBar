@@ -14,6 +14,7 @@ import org.ros.node.topic.Subscriber;
 public class SpeakerNode extends AbstractNodeMain {
 
 	private SourceDataLine sourceDataLine;
+	private MicTest mic;
 	
 	@Override
 	public GraphName getDefaultNodeName() {
@@ -30,7 +31,7 @@ public class SpeakerNode extends AbstractNodeMain {
 	@Override
 	public void onStart(ConnectedNode connectedNode) {
 
-		final MicTest mic = new MicTest();
+		this.mic = new MicTest();
 		try {
 			this.sourceDataLine = mic.setupSource();
 		} catch (LineUnavailableException e) {
