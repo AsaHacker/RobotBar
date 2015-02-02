@@ -9,6 +9,8 @@
   <node pkg="opencv_face_recog_node"
 	type="face_detect_node"
 	name="face_detect_node"
-	output="screen" />
+	output="screen" >
+    <env name="FACE_DETECT_NODE_WINDOW_FLAG" value="1" />
+  </node>
 
 </launch>
