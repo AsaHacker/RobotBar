@@ -3,7 +3,8 @@
 (ros::roseus "look_face_node")
 (ros::load-ros-manifest "std_msgs")
 
-(defvar *ros-rate* 10)
+(defvar *mirror-flag* 1)
+(defvar *ros-rate* 3)
 (defvar *detect-cnt* (* 2 *ros-rate*))
 
 (defun face-pos-callback
@@ -14,8 +15,8 @@
 	   (+ (aref org 0) (* 0.5 (aref org 2)))
 	   (+ (aref org 1) (* 0.5 (aref org 3)))))
 	 (pos (float-vector
-	       (* 2.0 (- (aref center-org 0) 0.5))
-	       (* 2.0 (- (aref center-org 1) 0.5)))))
+	       (* *mirror-flag* 2.0 (- (aref center-org 0) 0.5))
+	       (* -2.0 (- (aref center-org 1) 0.5)))))
     ;; (ros::publish
     ;;  "/pad_face_controller/emotion_vector/relative"
     ;;  (instance std_msgs::float64multiarray
@@ -29,12 +30,13 @@
   (pos &key (relative? t))
   (format t "[look_face] look at ~A~%" pos)
   (ros::publish
-   "/look_face_node/lookpos_vector/relative"
+   (if relative? "/kubi_sample/pan_tilt_vector/relative"
+     "/kubi_sample/pan_tilt_vector")
    (instance std_msgs::float32multiarray
 	     :init
-	     :data pos))
+	     :data (scale 5 pos)))
   (ros::publish
-   "/look_face_node/lookpos_vector"
+   "/pad_face_controller/lookpos_vector"
    (instance std_msgs::float64multiarray
 	     :init
 	     :data pos))
@@ -45,12 +47,20 @@
   (face-lookat (subseq (random-vector 1.0) 0 2) :relative? t))
 
 (ros::advertise
- "/look_face_node/lookpos_vector"
+ "/pad_face_controller/lookpos_vector"
  std_msgs::float64multiarray)
 
 (ros::advertise
- "/look_face_node/lookpos_vector/relative"
+ "/kubi_sample/pan_tilt_vector"
  std_msgs::float32multiarray)
+
+(ros::advertise
+ "/kubi_sample/pan_tilt_vector/relative"
+ std_msgs::float32multiarray)
+
+(ros::advertise
+ "/pad_face_controller/emotion_vector/relative"
+ std_msgs::float64multiarray)
 
 (ros::subscribe
  "/face_detector/normalized_max_rect"
