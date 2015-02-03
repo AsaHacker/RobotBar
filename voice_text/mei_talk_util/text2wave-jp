@@ -1,10 +1,14 @@
 #!/bin/bash 
 
 VOICE=$1 ;
-ROOT_DIR=`pwd` ;
 OUTPUT_FILE=tmp.wav ;
 SELIF=$VOICE ;
 FEELING=normal ;
+
+if [ ! "$ROOT_DIR" ];
+then
+    ROOT_DIR=`pwd` ;
+fi
 
 if [ "$#" -gt "1" ]
 then
